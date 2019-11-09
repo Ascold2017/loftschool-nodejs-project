@@ -66,17 +66,24 @@ export const connectSocket = () => (dispatch, getState) => {
   socket
     .on('users:list', data => dispatch(setUsers(data)))
     .on('users:add', data => dispatch(addUser(data)))
-    .on('users:leave', data => dispatch(removeUser(data)))
+    .on('users:leave', data => {
+      dispatch(removeUser(data))
+      const selectedRoom = chatSelectedRoomSelector(getState())
+      if (selectedRoom && selectedRoom.socketId === data) dispatch(setSelectedRoom(null))
+    })
+    .on('users:update', data => {
+      console.log('users:update', data)
+    })
     .on('message:history', data => dispatch(setRoomHistory(data)))
     .on('message:add', data => dispatch(appendMessage(data)));
 };
 
-export const connectRoom = ({ userId, socketId }) => (dispatch, getState) => {
+export const connectRoom = ({ userId, socketId, roomId }) => (dispatch, getState) => {
   const userProfile = userProfileSelector(getState());
   dispatch(setToZeroMessages())
   dispatch(setSelectedRoom({ recipientId: userId, socketId }))
   
-  socket.emit('message:history', { recipientId: userId, userId: userProfile.id })
+  socket.emit('message:history', { recipientId: userId, recipientSocketId: socketId, userId: userProfile.id })
 }
 
 export const sendMessage = () => (dispatch, getState) => {
