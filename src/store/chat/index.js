@@ -24,7 +24,7 @@ const users = handleActions(
   {
     [setUsers]: (_, action) => action.payload,
     [addUser]: (state, action) => [action.payload, ...state],
-    [removeUser]: (state, action) => state.filter(user => user.id !== action.payload)
+    [removeUser]: (state, action) => state.filter(user => user.socketId !== action.payload)
   },
   []
 );
