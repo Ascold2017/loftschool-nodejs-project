@@ -1,13 +1,14 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'recompose';
-import { AppBar, Toolbar, Container } from '@material-ui/core';
+import { AppBar, Toolbar, Container  } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import ButtonLink from '../common/ButtonLink';
 import routes from '../../constants/routes'
 import {
   userPermissionsSelector,
-  isAuthorizedSelector
+  isAuthorizedSelector,
+  userProfileSelector
 } from '../../store/auth';
 import _get from 'lodash.get'
 
@@ -19,7 +20,7 @@ const styles = () => ({
 
 class AppHeader extends PureComponent {
   renderAuthorizedNav() {
-    const { permissions } = this.props;
+    const { permissions, profile } = this.props;
     return (
       <>
         {_get(permissions, 'news.R', false) && (
@@ -39,7 +40,7 @@ class AppHeader extends PureComponent {
           </ButtonLink>
         )}
         <ButtonLink path={routes.profile} isRouterLink>
-          Профиль
+        { profile ? profile.username : '' }
         </ButtonLink>
       </>
     );
@@ -68,7 +69,8 @@ class AppHeader extends PureComponent {
 
 const mapStateToProps = state => ({
   isAuthorized: isAuthorizedSelector(state),
-  permissions: userPermissionsSelector(state)
+  permissions: userPermissionsSelector(state),
+  profile: userProfileSelector(state)
 });
 export default compose(
   withStyles(styles),

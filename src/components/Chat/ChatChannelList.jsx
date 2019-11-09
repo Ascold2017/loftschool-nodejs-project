@@ -7,11 +7,14 @@ import {
   ListItemText,
   Typography,
   CardHeader,
-  Divider
+  Divider,
+  ListItemSecondaryAction,
+  Badge
 } from '@material-ui/core';
+import MailIcon from '@material-ui/icons/Mail';
 import { withStyles } from '@material-ui/styles';
 import { compose } from 'recompose';
-import { chatUsersSelector, chatSelectedRoomSelector, setSelectedRoom } from '../../store/chat';
+import { chatUsersSelector, chatSelectedRoomSelector, connectRoom } from '../../store/chat';
 const styles = theme => ({
   column: {
     // backgroundColor: '#494949',
@@ -22,17 +25,29 @@ const styles = theme => ({
 });
 
 const ChannelsList = ({ classes, users, selectedRoom, dispatch }) => {
-  const selectRoom = userId => {
-    dispatch(setSelectedRoom(userId))
-  }
+  const selectRoom = user => {
+    dispatch(connectRoom({ userId: user.userId, socketId: user.socketId }));
+  };
   return (
     <Paper className={classes.column} square>
       <CardHeader title={<Typography variant="h5">Личные чаты</Typography>} />
       <Divider />
       <List>
         {users.map((user, index) => (
-          <ListItem button key={user.id} selected={user.id === selectedRoom} onClick={() => selectRoom(user.id)}>
+          <ListItem
+            button
+            key={user.userId}
+            selected={user.userId === selectedRoom && selectedRoom.userId}
+            onClick={() => selectRoom(user)}
+          >
             <ListItemText primary={user.username} />
+            <ListItemSecondaryAction>
+              {user.unreads && (
+                <Badge badgeContent={user.unreads} max={10} color="primary">
+                  <MailIcon />
+                </Badge>
+              )}
+            </ListItemSecondaryAction>
           </ListItem>
         ))}
       </List>

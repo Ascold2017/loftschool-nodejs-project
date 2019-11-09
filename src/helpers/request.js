@@ -22,7 +22,6 @@ const request = ({
     const {
       accessToken,
       accessTokenExpiredAt,
-      refreshToken,
       refreshTokenExpiredAt
     } = tokensSelector(getState());
 

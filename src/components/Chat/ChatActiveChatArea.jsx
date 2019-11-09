@@ -60,13 +60,13 @@ class ActiveChannelArea extends PureComponent {
                 key={i}
                 className={classNames(
                   classes.messageContainer,
-                  message.senderId === userId ? classes.isMyMessage : classes.isAnotherMessage
+                  message.senderId !== userId ? classes.isMyMessage : classes.isAnotherMessage
                 )}
               >
                 <Card
                   className={classNames(
                     classes.message,
-                    message.senderId === userId ? classes.messagePrimary : classes.messageSecondary
+                    message.senderId !== userId ? classes.messagePrimary : classes.messageSecondary
                   )}
                 >
                   {message.text}

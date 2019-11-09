@@ -1,7 +1,6 @@
 import { createAction, handleActions } from 'redux-actions';
 import { combineReducers } from 'redux';
 import request from '../../helpers/request';
-import { openNotification } from '../notifications';
 
 export const isLoadingNewsListSelector = state => state.news.isLoadingNewsList;
 export const isLoadingNewsFormSelector = state => state.news.isLoadingNewsForm;

@@ -14,6 +14,7 @@ export const setUsers = createAction(`${actionsPrefix}/SET_USERS`);
 export const addUser = createAction(`${actionsPrefix}/ADD_USER`);
 export const removeUser = createAction(`${actionsPrefix}/REMOVE_USER`);
 export const appendMessage = createAction(`${actionsPrefix}/ADD_MESSAGE`);
+export const setRoomHistory = createAction(`${actionsPrefix}/SET_ROOM_HISTORY`);
 export const setToZeroMessages = createAction(`${actionsPrefix}/SET_TO_ZERO_MESSAGES`);
 export const setSelectedRoom = createAction(`${actionsPrefix}/SET_SELECTED_ROOM`);
 export const setMessageText = createAction(`${actionsPrefix}/SET_MESSAGE_TEXT`);
@@ -30,7 +31,8 @@ const users = handleActions(
 
 const messages = handleActions(
   {
-    [appendMessage]: (state, action) => [...state, action.payload],
+    [appendMessage]: (state, action) =>  [...state, action.payload],
+    [setRoomHistory]: (state, action) => action.payload,
     [setToZeroMessages]: () => []
   },
   []
@@ -59,26 +61,36 @@ export const connectSocket = () => (dispatch, getState) => {
   const userProfile = userProfileSelector(getState());
   socket = socketIO('http://localhost:3000');
 
-  socket.emit('users:connect', { id: userProfile.id, username: userProfile.username });
+  socket.emit('users:connect', { userId: userProfile.id, username: userProfile.username });
 
   socket
     .on('users:list', data => dispatch(setUsers(data)))
     .on('users:add', data => dispatch(addUser(data)))
     .on('users:leave', data => dispatch(removeUser(data)))
+    .on('message:history', data => dispatch(setRoomHistory(data)))
     .on('message:add', data => dispatch(appendMessage(data)));
 };
+
+export const connectRoom = ({ userId, socketId }) => (dispatch, getState) => {
+  const userProfile = userProfileSelector(getState());
+  dispatch(setToZeroMessages())
+  dispatch(setSelectedRoom({ recipientId: userId, socketId }))
+  
+  socket.emit('message:history', { recipientId: userId, userId: userProfile.id })
+}
 
 export const sendMessage = () => (dispatch, getState) => {
   const state = getState()
   const userProfile = userProfileSelector(state);
   const selectedRoom = chatSelectedRoomSelector(state);
   const messageText = chatMessageText(state)
-  socket.emit('message:add', { senderId: userProfile.id, roomId: selectedRoom, text: messageText });
+  console.log(selectedRoom)
+  socket.emit('message:add', { senderId: userProfile.id, recipientId: selectedRoom.recipientId, roomId: selectedRoom.socketId, text: messageText });
   dispatch(resetMessage())
 };
 
 
-export const disconnectSocket = () => (dispatch, getState) => {
+export const disconnectSocket = () => (dispatch) => {
   socket && socket.disconnect()
   dispatch(setUsers([]))
   dispatch(setToZeroMessages())

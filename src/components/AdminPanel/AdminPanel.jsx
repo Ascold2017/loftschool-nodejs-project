@@ -122,7 +122,7 @@ class AdminPanel extends PureComponent {
   };
 
   render() {
-    const { classes, users, isLoading } = this.props;
+    const { classes, users } = this.props;
     const { selectedUserId, selectedUser } = this.state;
     return (
       <div className={classes.wrapper}>
