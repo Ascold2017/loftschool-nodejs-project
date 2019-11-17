@@ -1,35 +1,46 @@
 module.exports = (io) => {
-    let users = new Set();
+    let users = {}
+    let messages = []
     io.sockets
         .on('connection', (socket) => {
-            let id = socket.id;
+            let socketId = socket.id;
             let user = null;
+            const usersArray = () => Object.values(users).filter(u => u.userId !== user.userId)
 
             socket.on('users:connect', (data) => {
                 user = {
-                    id,
+                    socketId,
+                    userId: data.userId,
                     username: data.username
                 }
-                users.add(user)
-                console.log('User connected to chat: ' + id);
-                socket.emit('users:list', [...users]);
+                users[socketId] = user;
+                console.log('User connected to chat: ', user);
+                socket.emit('users:list', usersArray());
                 socket.broadcast.emit('users:add', user);
             })
-            
+
+            socket.on('message:history', data => {
+                console.log('message:history', data)
+
+                const history = messages.filter(msg =>
+                    (msg.senderId === data.recipientId || msg.senderId === data.userId)
+                    && (msg.recipientId === data.recipientId || msg.recipientId === data.userId))
+        
+                socket.emit('message:history', history)
+            })
 
             socket.on('message:add', (data) => {
-                if (io.sockets.connected[data.roomId]) {
-                    io.to(data.roomId).emit('message:add', data, id);
-                }
+                messages.push(data);
+                socket.emit('message:add', data);
+                io.to(data.roomId).emit('message:add', data, socketId);
             });
 
             socket.on('disconnect', (data) => {
-                console.log('User disconnected from chat: ' + id);
-                users.delete(user)
+                console.log('User disconnected from chat: ' + socketId);
+                delete users[socketId]
 
-                socket.broadcast.emit('users:leave', id);
+                socket.broadcast.emit('users:leave', socketId);
             });
         })
-
 }
 

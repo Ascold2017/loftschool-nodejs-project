@@ -1,7 +1,7 @@
 const User = require('../../db/models/user');
 const jwt = require('jsonwebtoken');
-const accessTokenLifeTime = 60 * 5 // 5 minutes
-const refreshTokenLifeTime = 60 * 60 * 3 // 3 hours
+const accessTokenLifeTime = 60 * 30 // 30 minutes
+const refreshTokenLifeTime = 60 * 60 * 24 // 24 hours
 
 const userSerializer = user => ({
     firstName: user.firstName || '',
