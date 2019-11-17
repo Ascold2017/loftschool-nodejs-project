@@ -82,7 +82,7 @@ export const connectRoom = ({ userId, socketId }) => (dispatch, getState) => {
   dispatch(setToZeroMessages())
   dispatch(setSelectedRoom({ recipientId: userId, socketId }))
   
-  socket.emit('message:history', { recipientId: userId, recipientSocketId: socketId, userId: userProfile.id })
+  socket.emit('message:history', { recipientId: userId, userId: userProfile.id })
 }
 
 export const sendMessage = () => (dispatch, getState) => {
