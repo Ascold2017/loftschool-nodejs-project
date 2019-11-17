@@ -77,7 +77,7 @@ export const connectSocket = () => (dispatch, getState) => {
     .on('message:add', data => dispatch(appendMessage(data)));
 };
 
-export const connectRoom = ({ userId, socketId, roomId }) => (dispatch, getState) => {
+export const connectRoom = ({ userId, socketId }) => (dispatch, getState) => {
   const userProfile = userProfileSelector(getState());
   dispatch(setToZeroMessages())
   dispatch(setSelectedRoom({ recipientId: userId, socketId }))
