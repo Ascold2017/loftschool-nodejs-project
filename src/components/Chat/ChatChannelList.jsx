@@ -41,13 +41,6 @@ const ChannelsList = ({ classes, users, selectedRoom, dispatch }) => {
             onClick={() => selectRoom(user)}
           >
             <ListItemText primary={user.username} />
-            <ListItemSecondaryAction>
-              {user.unreads && (
-                <Badge badgeContent={user.unreads} max={10} color="primary">
-                  <MailIcon />
-                </Badge>
-              )}
-            </ListItemSecondaryAction>
           </ListItem>
         ))}
       </List>

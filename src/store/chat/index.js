@@ -12,6 +12,7 @@ export const chatMessageText = state => state.chat.messageText;
 const actionsPrefix = 'CHAT';
 export const setUsers = createAction(`${actionsPrefix}/SET_USERS`);
 export const addUser = createAction(`${actionsPrefix}/ADD_USER`);
+export const updateUser = createAction(`${actionsPrefix}/UPDATE_USER`);
 export const removeUser = createAction(`${actionsPrefix}/REMOVE_USER`);
 export const appendMessage = createAction(`${actionsPrefix}/ADD_MESSAGE`);
 export const setRoomHistory = createAction(`${actionsPrefix}/SET_ROOM_HISTORY`);
@@ -24,6 +25,7 @@ const users = handleActions(
   {
     [setUsers]: (_, action) => action.payload,
     [addUser]: (state, action) => [action.payload, ...state],
+    [updateUser]: (state, action) => state.map(user => user.userId === action.payload.userId ? action.payload : user),
     [removeUser]: (state, action) => state.filter(user => user.socketId !== action.payload)
   },
   []
@@ -71,9 +73,6 @@ export const connectSocket = () => (dispatch, getState) => {
       const selectedRoom = chatSelectedRoomSelector(getState())
       if (selectedRoom && selectedRoom.socketId === data) dispatch(setSelectedRoom(null))
     })
-    .on('users:update', data => {
-      console.log('users:update', data)
-    })
     .on('message:history', data => dispatch(setRoomHistory(data)))
     .on('message:add', data => dispatch(appendMessage(data)));
 };
@@ -91,7 +90,6 @@ export const sendMessage = () => (dispatch, getState) => {
   const userProfile = userProfileSelector(state);
   const selectedRoom = chatSelectedRoomSelector(state);
   const messageText = chatMessageText(state)
-  console.log(selectedRoom)
   socket.emit('message:add', { senderId: userProfile.id, recipientId: selectedRoom.recipientId, roomId: selectedRoom.socketId, text: messageText });
   dispatch(resetMessage())
 };
