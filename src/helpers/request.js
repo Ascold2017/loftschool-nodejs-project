@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { tokensSelector, refreshTokenRequest, logout } from '../store/auth';
 import { openNotification } from '../store/notifications';
-const baseURL = 'http://localhost:3000/api/';
+const baseURL = '/api/';
 const instance = axios.create({ baseURL });
 
 const waitQueue = [];
@@ -18,21 +18,13 @@ const request = ({
   dispatch = () => {}
 }) =>
   new Promise((resolve, reject) => {
-    
-    const {
-      accessToken,
-      accessTokenExpiredAt,
-      refreshTokenExpiredAt
-    } = tokensSelector(getState());
+    const { accessToken, accessTokenExpiredAt, refreshTokenExpiredAt } = tokensSelector(getState());
 
     // request handler
     const requestFunc = ({ url, method, headers, data, resolve, reject }) => {
       if (!isWithoutToken) {
-        const {
-          accessToken,
-          refreshToken,
-        } = tokensSelector(getState());
-        (headers['Authorization'] = isRefresh ? refreshToken : accessToken);
+        const { accessToken, refreshToken } = tokensSelector(getState());
+        headers['Authorization'] = isRefresh ? refreshToken : accessToken;
       }
 
       return instance({ url, method, headers, data })
@@ -51,7 +43,7 @@ const request = ({
             switch (status) {
               case 401:
               case 403:
-                dispatch(logout())
+                dispatch(logout());
                 return reject(errorResponse);
               case 500:
               case 502:
@@ -106,7 +98,7 @@ const request = ({
           })
           .catch(() => {
             // by default in error - logout user
-            dispatch(logout())
+            dispatch(logout());
             // eslint-disable-next-line
             reject({ detail: 'Refresh token error' });
           });
@@ -116,7 +108,7 @@ const request = ({
       }
     } else if (isRefreshExpired && !isWithoutToken) {
       // if refresh is expired - just logout
-      dispatch(logout())
+      dispatch(logout());
       // eslint-disable-next-line
       reject({ detail: 'Refresh token is expired' });
     } else {
